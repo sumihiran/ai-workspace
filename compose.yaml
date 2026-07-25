@@ -4,15 +4,35 @@ x-agent-environment: &agent-environment
   ANTHROPIC_AUTH_TOKEN: ${AI_GATEWAY_API_KEY:?Set AI_GATEWAY_API_KEY in .env}
   ANTHROPIC_API_KEY: ""
   CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY: "1"
+  CLAUDE_CODE_ENABLE_TELEMETRY: "1"
+  CLAUDE_CODE_ENHANCED_TELEMETRY_BETA: "1"
+  CLAUDE_CODE_PROPAGATE_TRACEPARENT: "1"
+  OTEL_METRICS_EXPORTER: otlp
+  OTEL_LOGS_EXPORTER: otlp
+  OTEL_TRACES_EXPORTER: otlp
+  OTEL_TRACES_EXPORT_INTERVAL: ${OTEL_TRACES_EXPORT_INTERVAL:-1000}
+  OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+  OTEL_LOG_USER_PROMPTS: "1"
+  OTEL_LOG_TOOL_DETAILS: ${OTEL_LOG_TOOL_DETAILS:-0}
+  OTEL_LOG_TOOL_CONTENT: ${OTEL_LOG_TOOL_CONTENT:-0}
+  OTEL_LOG_RAW_API_BODIES: ${OTEL_LOG_RAW_API_BODIES:-0}
+  OTEL_RESOURCE_ATTRIBUTES: service.namespace=ai-workspace,deployment.environment.name=local
 
 x-development-environment: &development-environment
   working_dir: /workspace
+  depends_on:
+    otel-collector:
+      condition: service_started
   volumes:
     - ./workspace:/workspace
+    - ./config/codex/config.toml:/home/vscode/.codex/config.toml:ro
   environment:
     <<: *agent-environment
   stdin_open: true
   tty: true
+
+name: ai-workspace
 
 services:
   node:
@@ -30,6 +50,7 @@ services:
     image: vercel-gateway-agents-java:local
     volumes:
       - ./workspace:/workspace
+      - ./config/codex/config.toml:/home/vscode/.codex/config.toml:ro
       - maven-cache:/home/vscode/.m2
       - gradle-cache:/home/vscode/.gradle
 
@@ -39,6 +60,21 @@ services:
       context: .
       dockerfile: containers/rust.Dockerfile
     image: vercel-gateway-agents-rust:local
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.153.0
+    command:
+      - --config=/etc/otelcol-contrib/config${OTEL_ENABLED:+.dash0}.yaml
+    environment:
+      DASH0_OTLP_ENDPOINT: ${DASH0_OTLP_ENDPOINT:-http://127.0.0.1:4318}
+      DASH0_AUTH_TOKEN: ${DASH0_AUTH_TOKEN:-}
+      DASH0_DATASET: ${DASH0_DATASET:-default}
+      OTEL_COLLECTOR_LOG_LEVEL: ${OTEL_COLLECTOR_LOG_LEVEL:-debug}
+      OTEL_DEBUG_VERBOSITY: ${OTEL_DEBUG_VERBOSITY:-basic}
+    volumes:
+      - ./config/otel-collector.yaml:/etc/otelcol-contrib/config.yaml:ro
+      - ./config/otel-collector.dash0.yaml:/etc/otelcol-contrib/config.dash0.yaml:ro
+    stop_grace_period: 10s
 
 volumes:
   gradle-cache:

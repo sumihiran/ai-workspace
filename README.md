@@ -13,6 +13,7 @@ Run Codex or Claude Code in an isolated dev container.
 - [Codex](#codex)
 - [Claude Code](#claude-code)
 - [Dev Containers](#dev-containers)
+- [OpenTelemetry](#opentelemetry)
 - [Disclaimer](#disclaimer)
 - [License](#license)
 
@@ -98,6 +99,32 @@ Inside the container:
 ```sh
 codex
 claude --model moonshotai/kimi-k3
+```
+
+## Observability
+
+Codex and Claude then send prompts, metrics, logs, and traces through the
+collector.
+
+Noop by default. Enable Dash0 export in `.env`:
+
+```dotenv
+OTEL_ENABLED=1
+DASH0_OTLP_ENDPOINT=https://ingress.example.aws.dash0.com
+DASH0_AUTH_TOKEN=auth_your_token
+DASH0_DATASET=ai-workspace
+```
+
+> [!CAUTION]
+> Tool details, tool content, and complete API bodies remain
+> disabled by default because they may contain source code or secrets. 
+
+Enable them only when required:
+
+```dotenv
+OTEL_LOG_TOOL_DETAILS=1
+OTEL_LOG_TOOL_CONTENT=1
+OTEL_LOG_RAW_API_BODIES=1
 ```
 
 ## Disclaimer

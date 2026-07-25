@@ -7,6 +7,7 @@ RUN bash /usr/local/share/install-agent-tools.sh vscode \
     && rm /usr/local/share/install-agent-tools.sh
 
 COPY --chown=vscode:vscode config/codex/config.toml /home/vscode/.codex/config.toml
+COPY --chown=vscode:vscode config/claude/settings.json /home/vscode/.claude/settings.json
 
 USER vscode
 ENV PATH="/home/vscode/.local/bin:${PATH}"
