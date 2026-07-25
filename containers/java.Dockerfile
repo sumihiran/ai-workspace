@@ -1,0 +1,26 @@
+FROM mcr.microsoft.com/devcontainers/base:bookworm
+
+ARG JAVA_VERSION=25.0.4-amzn
+
+USER root
+
+COPY containers/install-agent-tools.sh /usr/local/share/install-agent-tools.sh
+RUN bash /usr/local/share/install-agent-tools.sh vscode \
+    && rm /usr/local/share/install-agent-tools.sh
+
+RUN su - vscode -c 'curl -fsSL https://get.sdkman.io | bash' \
+    && su - vscode -c "bash -c 'source /home/vscode/.sdkman/bin/sdkman-init.sh \
+        && sdk install java ${JAVA_VERSION} \
+        && sdk default java ${JAVA_VERSION}'" \
+    && sed -i 's/^sdkman_healthcheck_enable=.*/sdkman_healthcheck_enable=false/' \
+        /home/vscode/.sdkman/etc/config
+
+COPY --chown=vscode:vscode config/codex/config.toml /home/vscode/.codex/config.toml
+
+USER vscode
+ENV SDKMAN_DIR="/home/vscode/.sdkman"
+ENV JAVA_HOME="/home/vscode/.sdkman/candidates/java/current"
+ENV PATH="${JAVA_HOME}/bin:/home/vscode/.local/bin:${PATH}"
+
+WORKDIR /workspace
+CMD ["sleep", "infinity"]

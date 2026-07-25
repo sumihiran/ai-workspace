@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+set -eu
+
+service="${AGENT_ENV:-node}"
+
+case "$service" in
+    node|java|rust) ;;
+    *)
+        echo "AGENT_ENV must be node, java, or rust (received: $service)" >&2
+        exit 2
+        ;;
+esac
+
+exec docker compose run --rm "$service" claude "$@"

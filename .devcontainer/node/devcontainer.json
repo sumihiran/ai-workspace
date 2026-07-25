@@ -1,0 +1,8 @@
+{
+  "name": "node-ai-workspace",
+  "dockerComposeFile": "../../compose.yaml",
+  "service": "node",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  "remoteUser": "vscode"
+}

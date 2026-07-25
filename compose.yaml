@@ -1,0 +1,45 @@
+x-agent-environment: &agent-environment
+  AI_GATEWAY_API_KEY: ${AI_GATEWAY_API_KEY:?Set AI_GATEWAY_API_KEY in .env}
+  ANTHROPIC_BASE_URL: https://ai-gateway.vercel.sh
+  ANTHROPIC_AUTH_TOKEN: ${AI_GATEWAY_API_KEY:?Set AI_GATEWAY_API_KEY in .env}
+  ANTHROPIC_API_KEY: ""
+  CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY: "1"
+
+x-development-environment: &development-environment
+  working_dir: /workspace
+  volumes:
+    - ./workspace:/workspace
+  environment:
+    <<: *agent-environment
+  stdin_open: true
+  tty: true
+
+services:
+  node:
+    <<: *development-environment
+    build:
+      context: .
+      dockerfile: containers/node.Dockerfile
+    image: vercel-gateway-agents-node:local
+
+  java:
+    <<: *development-environment
+    build:
+      context: .
+      dockerfile: containers/java.Dockerfile
+    image: vercel-gateway-agents-java:local
+    volumes:
+      - ./workspace:/workspace
+      - maven-cache:/home/vscode/.m2
+      - gradle-cache:/home/vscode/.gradle
+
+  rust:
+    <<: *development-environment
+    build:
+      context: .
+      dockerfile: containers/rust.Dockerfile
+    image: vercel-gateway-agents-rust:local
+
+volumes:
+  gradle-cache:
+  maven-cache:
