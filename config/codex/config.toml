@@ -8,15 +8,3 @@ base_url = "https://ai-gateway.vercel.sh/v1"
 env_key = "AI_GATEWAY_API_KEY"
 wire_api = "responses"
 supports_websockets = false
-
-[otel]
-environment = "local"
-log_user_prompt = true
-
-[otel.exporter.otlp-http]
-endpoint = "http://otel-collector:4318/v1/logs"
-protocol = "binary"
-
-[otel.trace_exporter.otlp-http]
-endpoint = "http://otel-collector:4318/v1/traces"
-protocol = "binary"

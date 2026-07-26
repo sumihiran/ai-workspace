@@ -11,4 +11,4 @@ case "$service" in
         ;;
 esac
 
-exec docker compose run --rm "$service" claude "$@"
+exec docker compose run --rm "$service" nemo-relay claude -- "$@"

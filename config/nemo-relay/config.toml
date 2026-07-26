@@ -1,0 +1,9 @@
+[upstream]
+openai_base_url = "https://ai-gateway.vercel.sh/v1"
+anthropic_base_url = "https://ai-gateway.vercel.sh"
+
+[agents.codex]
+command = "codex-real"
+
+[agents.claude]
+command = "claude-real"

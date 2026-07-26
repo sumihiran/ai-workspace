@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+set -eu
+
+if ! codex-real login status >/dev/null 2>&1; then
+    if [ -z "${OPENAI_API_KEY:-}" ]; then
+        echo "OPENAI_API_KEY is required to authenticate Codex through NeMo Relay" >&2
+        exit 1
+    fi
+
+    if ! printf '%s\n' "$OPENAI_API_KEY" |
+        codex-real login --with-api-key >/dev/null 2>&1; then
+        echo "Failed to initialize Codex authentication from OPENAI_API_KEY" >&2
+        exit 1
+    fi
+fi
+
+exec nemo-relay codex -- "$@"

@@ -1,23 +1,12 @@
 x-agent-environment: &agent-environment
   AI_GATEWAY_API_KEY: ${AI_GATEWAY_API_KEY:?Set AI_GATEWAY_API_KEY in .env}
+  OPENAI_API_KEY: ${AI_GATEWAY_API_KEY:?Set AI_GATEWAY_API_KEY in .env}
   ANTHROPIC_BASE_URL: https://ai-gateway.vercel.sh
   ANTHROPIC_AUTH_TOKEN: ${AI_GATEWAY_API_KEY:?Set AI_GATEWAY_API_KEY in .env}
   ANTHROPIC_API_KEY: ""
   CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY: "1"
-  CLAUDE_CODE_ENABLE_TELEMETRY: "1"
-  CLAUDE_CODE_ENHANCED_TELEMETRY_BETA: "1"
-  CLAUDE_CODE_PROPAGATE_TRACEPARENT: "1"
-  OTEL_METRICS_EXPORTER: otlp
-  OTEL_LOGS_EXPORTER: otlp
-  OTEL_TRACES_EXPORTER: otlp
-  OTEL_TRACES_EXPORT_INTERVAL: ${OTEL_TRACES_EXPORT_INTERVAL:-1000}
-  OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
-  OTEL_LOG_USER_PROMPTS: "1"
-  OTEL_LOG_TOOL_DETAILS: ${OTEL_LOG_TOOL_DETAILS:-0}
-  OTEL_LOG_TOOL_CONTENT: ${OTEL_LOG_TOOL_CONTENT:-0}
-  OTEL_LOG_RAW_API_BODIES: ${OTEL_LOG_RAW_API_BODIES:-0}
-  OTEL_RESOURCE_ATTRIBUTES: service.namespace=ai-workspace,deployment.environment.name=local
+  NEMO_RELAY_OPENAI_AUTH_HEADER: Bearer ${AI_GATEWAY_API_KEY:?Set AI_GATEWAY_API_KEY in .env}
+  NEMO_RELAY_ANTHROPIC_AUTH_HEADER: Bearer ${AI_GATEWAY_API_KEY:?Set AI_GATEWAY_API_KEY in .env}
 
 x-development-environment: &development-environment
   working_dir: /workspace
@@ -26,7 +15,8 @@ x-development-environment: &development-environment
       condition: service_started
   volumes:
     - ./workspace:/workspace
-    - ./config/codex/config.toml:/home/vscode/.codex/config.toml:ro
+    - ./config/codex:/etc/codex:ro
+    - codex-home:/home/vscode/.codex
   environment:
     <<: *agent-environment
   stdin_open: true
@@ -50,7 +40,8 @@ services:
     image: vercel-gateway-agents-java:local
     volumes:
       - ./workspace:/workspace
-      - ./config/codex/config.toml:/home/vscode/.codex/config.toml:ro
+      - ./config/codex:/etc/codex:ro
+      - codex-home:/home/vscode/.codex
       - maven-cache:/home/vscode/.m2
       - gradle-cache:/home/vscode/.gradle
 
@@ -77,5 +68,6 @@ services:
     stop_grace_period: 10s
 
 volumes:
+  codex-home:
   gradle-cache:
   maven-cache:

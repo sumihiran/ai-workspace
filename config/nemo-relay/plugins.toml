@@ -1,0 +1,20 @@
+version = 1
+
+[[components]]
+kind = "observability"
+enabled = true
+
+[components.config]
+version = 2
+
+[components.config.openinference]
+enabled = true
+transport = "http_binary"
+endpoint = "http://otel-collector:4318/v1/traces"
+service_name = "coding-agent"
+service_namespace = "ai-workspace"
+instrumentation_scope = "nemo-relay-openinference"
+timeout_millis = 3000
+
+[components.config.openinference.resource_attributes]
+"deployment.environment.name" = "local"

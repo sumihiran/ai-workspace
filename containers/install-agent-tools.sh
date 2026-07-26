@@ -55,4 +55,16 @@ npm install --global @openai/codex@latest
 
 su - "$agent_user" -c 'curl -fsSL https://claude.ai/install.sh | bash'
 
+agent_home="$(getent passwd "$agent_user" | cut -d: -f6)"
+mv "$agent_home/.local/bin/claude" "$agent_home/.local/bin/claude-real"
+
+codex_path="$(command -v codex)"
+ln -s "$codex_path" /usr/local/bin/codex-real
+
+su - "$agent_user" -c \
+    'curl -fsSL https://raw.githubusercontent.com/NVIDIA/NeMo-Relay/main/install.sh \
+        | NEMO_RELAY_VERSION=0.6.0 sh'
+
+install -d -o "$agent_user" -g "$agent_user" "$agent_home/.config/nemo-relay"
+
 rm -rf /var/lib/apt/lists/*

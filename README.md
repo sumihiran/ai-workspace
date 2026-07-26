@@ -13,7 +13,7 @@ Run Codex or Claude Code in an isolated dev container.
 - [Codex](#codex)
 - [Claude Code](#claude-code)
 - [Dev Containers](#dev-containers)
-- [OpenTelemetry](#opentelemetry)
+- [Observability](#observability)
 - [Disclaimer](#disclaimer)
 - [License](#license)
 
@@ -103,29 +103,25 @@ claude --model moonshotai/kimi-k3
 
 ## Observability
 
-Codex and Claude then send prompts, metrics, logs, and traces through the
-collector.
+The launch scripts run agent cli through [NVIDIA NeMo Relay](https://docs.nvidia.com/nemo/relay).
 
-Noop by default. Enable Dash0 export in `.env`:
+![NeMo Relay OpenInference telemetry showing model and token usage](docs/images/nemo-relay-openinference-telemetry.png)
+
+Trace exporter is configured for Noop by default. 
+Enable Dash0 export in `.env`:
 
 ```dotenv
 OTEL_ENABLED=1
 DASH0_OTLP_ENDPOINT=https://ingress.example.aws.dash0.com
-DASH0_AUTH_TOKEN=auth_your_token
-DASH0_DATASET=ai-workspace
+DASH0_AUTH_TOKEN=<auth_token>
+DASH0_DATASET=default
 ```
 
 > [!CAUTION]
-> Tool details, tool content, and complete API bodies remain
-> disabled by default because they may contain source code or secrets. 
-
-Enable them only when required:
-
-```dotenv
-OTEL_LOG_TOOL_DETAILS=1
-OTEL_LOG_TOOL_CONTENT=1
-OTEL_LOG_RAW_API_BODIES=1
-```
+> OpenInference spans include prompts, responses, tool inputs, and tool
+> outputs. They may contain source code, personal data, or secrets. Restrict
+> access to the telemetry backend and configure an appropriate retention
+> policy.
 
 ## Disclaimer
 
